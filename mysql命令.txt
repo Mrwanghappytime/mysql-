@@ -1,0 +1,6 @@
+select distinct columns_names from table_name order by columns limit number1,number2;
+select * from book where book_id between 1 and 3 and name is not null order by book_id desc limit 2,3;
+select concat(book_id,'(name=',name, 'number=',number ,')') from book where book_id  > 6 or book_id <5 and book_id = 4 order by book_id desc limit 2; 
+
+select concat(book_id,'(name=',name, 'number=',number ,')') as information from book where book_id  > 6 or book_id <5 and book_id = 4 order by book_id desc limit 2; 
+select bookid*number as info from book;
