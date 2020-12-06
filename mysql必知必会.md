@@ -62,15 +62,62 @@ select concat(id,'(' , name ,')') from book order by id limit 3;
 //AS用于将表达式作为某个列输出四则运算也可以使用
 now()用于表示当前时间
 
+//mysql时间函数
+mysql时间处理函数：mysql日期表示可以为yyyy-mm-dd 此为标准格式，例如当用日期作为where条件时
+select date from tablename where date(date) = 'yyyy-mm-dd'
+select id , adddate(curdate(),number) as date from book;
+adddate(); //增加一个日期
+select id , addtime(time(),0) as date from book;
+addtime(); //增加一个time
+selec id , curdate() as date from book;
+curdate(); //返回当前日期
+curtime(); //获取当前time
+date(); //返回日期时间的日期部分
+datediff(); //计算日期只差
+date_add(); //高度灵活的日期运算符
 
-
-
-
-
+date_format() ;// 日期事件格式转换
+day(); //返回一个日期的天数部分
+dayofweek(); //返回星期几
+hour(); //返回时间的小时部分
+minute();//返回时间的分钟部分
+month(); //返回时间的月份部分
+now();//返回时间和日期
+second() ; // 返回秒部分
+time(); // 返回时间部分
+year(); //返回年份部分
 
 ```
 
-​		
+### 3.select高级函数
+
+```sql
+AVG();//返回平均值
+select avg(shuxing) from table_name;
+count();//返回行数 count(*) 会计算null count(columns_name)不会计算null
+select count(*) as count from table_name;
+max();//返回某列的最大值
+min();//返回某列的最小值
+sum();返回某列的总数
+select count(*) as count , sum(id) as sum ,avg(id) as avg min(id) as min,max(id) as max from user;
+//上述函数可以使用distinct进行修饰，例如avg(distinct columns)
+
+//group by 用于对聚合函数进行修饰，用于分组
+select password ,id,count(password) from user group by password,id ;
+//having 用于对group by数据后的条件限制
+select password , count(password) from user group by password having count(password) > 1
+
+//自己总结如下：
+select sum(password*id) as sum ,max(password*id) as max from user group by password;
+mysql select修饰符有哪些，他们的顺序为如何？
+修饰符除了select * from tables;顺序为：
+where > group by > having > order by > limit;
+select count(*) from user where id > 3 goup by password having count(*) > 1 order by count(*) desc limit 1;
+```
+
+### 4.使用子查询
+
+
 
 
 
