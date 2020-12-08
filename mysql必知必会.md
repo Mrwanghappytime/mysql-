@@ -117,19 +117,162 @@ select count(*) from user where id > 3 goup by password having count(*) > 1 orde
 
 ### 4.使用子查询
 
+```
+主要有两种用法
+1.select * from tables where id in (select id from table)
+2.select id ,(select count(*) from article where article.id = article_tags.aid) from article//后续如何修改？
+```
+
+### 5.联结表
+
+```sql
+1.直接连接
+use vueblog2;
+select article.id,article_tags.id from article,article_tags where article.id = article_tags.aid 返回article和article——Tags笛卡尔积 叫做cross join（叉链接）
+2.内部连接
+select article.id,article_tags.id from article inner join article_tags on article.id = article_tag.id;//可以达到和上述一样的效果，但是下者可能效率更加高效
+3.table也可以有别名
+例如：select id from article as a where a.id > 10
+4.自联结，将自己作为两个表，满足一定的条件进行连接
+select a1.id , a2.id from article as a1,article as a2 where a1.id = a2.id and a1.id > 100;或者
+select a1.id ,a2.id from article as a1 inner join article as a2 on a1.id = a2.id;
+5.外联阶，分为两种，一种为左连接 left outer join 一种为有链接 right outer join
+左连接以左表为标准，右连接以右表为标准，不为标准的表可以为null
+语法为 left outer join on conditon / right outer join on condition
+select a.id , a2.id from article as a left outer join article_tags as a2 on a1.id = a2.aid;//当一个表中存在以另一个表的主键的外键时，可以将此表作为标准
+//组合查询
+将多个查询记录集合在几个表中，并集
+格式为select语句 union select2 [union select]
+union 会默认去掉重复的行，union all可以显示重复的行
+全文搜索在后续面试题中在进行学习
+```
+
+### 6.insert，update，del（相比较而言select更加重要）
+
+```
+insert into table_name values();
+insert info table_Name(columns) values(values);//在插入自动增长的主键时可以用null，使mysql自己得到主键
+多条insert语句可以写成
+insert into table_Name(columns) values(values),(values);也可以
+insert info tables_name(columns) select columns from tables_name;
+//insert del update比较耗费资源，LOW_PRIORITY
+insert LOW_PRIORITY into 可降低insert的优先级
+
+update table_name set columns_value = '' where;
+//当update多个列时，当某个列出先错误，则表回到更新前，可用ignore规避这种现象
+delete from table_name where condition 从表中删除行
+删除所有行可以delect from table where 1=1;但是效率极低
+可用truncate table,此为删除表，然后重新建立一张表
 
 
+```
 
+### 7.创建表和视图
 
+```sql
+create table if not exists table_name (
+	id int not null auto_increment,
+	name char(30) not null,
+	address char(50) not null,
+	city char(50) not null,
+	primary key(id)
+)engine=InnoDB;
 
+也可以用组合主键
+primary key(key1,key2)//表示key1和key2的组合不能有相同的值
+在使用自动增长主键的时候可以使用last_insert_id()获取最后一个插入的主键
+2。mysql 引擎类型
+在不执行engine=InnoDB时，此时默认的引擎为MyISAM
+InnoDb支持事务，但是不支持全文搜索
+MyISAN支持全文搜索，但是不支持事务
+外键不能跨引擎
 
+3.更新表
+ALTER TABLE TABLE_NAME ADD VEND CHAR(20);//增加列
+ALTER TABLE TABLE_NAME DROP COLUMN VEND; //删除列
+alter table table_name add constraint constraint_name forgien key (column) refrence table_name2 (column);
+4.删除表
+drop table table_name;
+5.重命名表
+rename table table_Name to table_name2
+6.视图（需满足下面的条件）
+与表一样，视图必须唯一命名（不能给视图取与别的视图或表相
+同的名字）。  对于可以创建的视图数目没有限制。
+ 为了创建视图，必须具有足够的访问权限。这些限制通常由数据
+库管理人员授予。
+ 视图可以嵌套，即可以利用从其他视图中检索数据的查询来构造
+一个视图。
+ ORDER BY可以用在视图中，但如果从该视图检索数据SELECT中也
+含有ORDER BY，那么该视图中的ORDER BY将被覆盖。
+ 视图不能索引，也不能有关联的触发器或默认值。
+ 视图可以和表一起使用。例如，编写一条联结表和视图的SELECT
+语句。
+show create view viewname;
+DROP VIEW VIEWNAME;
+CREATE OR REPLACE VIEW;  用于替换试图
+create view viewname as select（连接语句）
+视图在多数情况下用来进行查询，查询方式和表一致，更新则会更新到基表，但是当使用了一些条件后会导致无法更新
+```
 
+### 8.存储过程
 
+```sql
+存储过程，sql程序的集合，类似于包装函数
+创建过程如下：
+create procedure avg_id()
+begin
+	select avg(id) from article;
+end//
+如果直接输入上述语句，mysql会报错，此时我们可以修改mysql语句终止符用来确保语句执行成功，但是在切换后必须切回来，用delimiter  后街字符表示，但是不能用字符\
+比如delimiter // delimiter ;
+使用call procedure_name用来调用存储过程
 
+删除存储过程为 drop procedure arg_id;
+下面的代码为手写几段存储过程代码
+```
 
+```sql
+--  同时有in参数和out参数
+delimiter //
+create procedure avg_id(IN inid INT,OUT avg_id INT)
+begin 
+	select avg(id) from article where id > inid into avg_id;
+end//
 
+create procedure jisuan(in inid INT,OUT avg_id int,out countid int,out total int)
+begin
+	select avg(id)  from article where id > inid into avg_id;
+	select count(*) from article where id > inid into countid;
+	select avg_id*countid into total;
+end//
 
+delimiter ;
+传递参数的方式，以jisuan为例
+call jisuan(100,@avgid,@countid,@total);
+获取参数方式
+select @avgid;其中@字符不能忘记
+```
 
+### 9.触发器
+
+```
+1.定义，在更新表时使其自动的执行一些内容（update,delete,insert），通俗意义上将，在事件发生时，触发器自动触发,所以触发器主要分为三种为update insert delete
+
+2.创建触发器和删除触发器
+create trigger trigger_name;
+drop trigger trigger_name;
+
+3.insert触发器,在触发器中可以访问一个new的虚拟表，insert触发器可以选择之前之后都可以
+例如：
+create trigger trigger1 before insert on article for each row select new.id;
+
+4.delete可以访问一张old表，可读不可写
+
+5。update 同时满足上者
+//后续需进行补强
+```
+
+### 10.
 
 
 
