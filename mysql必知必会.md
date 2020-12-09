@@ -272,17 +272,92 @@ create trigger trigger1 before insert on article for each row select new.id;
 //后续需进行补强
 ```
 
-### 10.
+### 10.mysql事务
+
+```sql
+1.并非所有的引擎都支持事务，其中MyIsam不支持事务，InnoDB支持事务，下面为事务的一些关键词
+事务：一组sql语句
+回退：指撤销指定SQL语句的过程
+提交：指将未存储的SQL语句结果提交写入到数据表
+保留点：指事务处理中设置的临时占位符（placeholder），你可以对它发布回退
+2.可以使用start transaction开启一个事务，用rollback回退事务，但是事务回退的语句只有insert，update,delete语句，其他语句不可以回退，例如：
+select id from article;
+start transaction;
+select id from article;
+delete from article;
+drop table ueer if exists;
+rollback;
+select id from article;
+3.commit可以用于显示提交事务，事务不会隐形提交，但是sql语句会隐形提交
+start transaction;
+sql group;
+commit;
+4.保留点,可使事务回退到指定点，不会全部回退
+start transaction;
+select * from tags;
+delete from tags;
+savepoint ponitname;
+select * from tags;
+rollback;
+select * from tags;
+
+start transaction;
+select * from tags;
+delete from tags;
+savepoint ponitname;
+select * from tags;
+rollback to pointname;
+select * from tags;
+讨论上述两者的区别；
+5.默认的提交行为执行一条sql语句隐形提交，可以使用
+set autocommit=0;改变这种情况，知道autocommit被设置成1为止;
+
+例如
+set autocommit=0;
+insert into article(id) values(1);
+set autocommit=1;//在此语句之前，前一句不会对具体的表生效
+```
+
+### 11.全球化和本地化
+
+```sql
+1.查看MySQL支持的字符集
+show character set;
+2.查看校对顺序
+show collation;
+//后续详解
+```
+
+### 12.安全管理*
+
+```sql
+1.管理用户
+所有的用户都被存储在mysql数据库中，其中的表user为用户信息
+use mysql
+select * from user;
+2.创建用户
+create user ben identified by '123456' 其中123456为密码
+3.修改用户的用户名：
+rename user ben to newname;
+4.删除用户
+drop user newname;
+5.查看用户权限
+show grants for ben;
+6.修改权限
+grant select on vueblog2.* to ben;
+7.撤销权限
+revoke select on vueblog2.* to ben;
+GRANT和REVOKE可在几个层次上控制访问权限：
+整个服务器，使用GRANT ALL和REVOKE ALL； 
+整个数据库，使用ON database.*；
+特定的表，使用ON database.table； 
+特定的列；
+特定的存储过程
+8.权限如下图
+```
 
 
 
+![image-20201209223159408](C:\Users\汪浩锋\AppData\Roaming\Typora\typora-user-images\image-20201209223159408.png)
 
-
-
-
-
-
-
-
-
-
+### 
